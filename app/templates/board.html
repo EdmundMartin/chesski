@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <title>chessboardjs Example #1001 - Start Position</title>
+  <title>Chesski Move Trainer</title>
   <base href="../" />
   <link rel="stylesheet" href="css/chessboard-1.0.0.css">
 </head>
@@ -13,6 +13,7 @@
 <!--- Begin Example HTML ------------------------------------------------------>
 <div id="myBoard" style="width: 400px"></div>
 <!--- End Example HTML -------------------------------------------------------->
+<button onclick="loadPuzzle()">Next Puzzle</button>
 
 <script src="js/jquery-3.4.1.min.js"></script>
 <script src="js/chessboard-1.0.0.js" ></script>
@@ -21,7 +22,7 @@
 
 let idx = 0
 let playerTurn = true;
-let example = {
+let puzzle = {
     "startingPostion": "r1bq1rk1/pppp1pp1/2n4p/2b1p3/2B1P1n1/2NP1N2/PPPB1PPP/R2Q1RK1 b - - 3 8",
     "moves": [
         {"start": "f3", "end": "e5"},
@@ -30,8 +31,8 @@ let example = {
 }
 
 function computesMove () {
-  if (playerTurn === false || idx < example.moves.length) {
-    let computersMove = example.moves[idx];
+  if (playerTurn === false || idx < puzzle.moves.length) {
+    let computersMove = puzzle.moves[idx];
     board.move(computersMove.start + "-" + computersMove.end);
     playerTurn = true;
     idx++;
@@ -42,10 +43,10 @@ function onDrop (source, target, piece, newPos, oldPos, orientation) {
     if (!playerTurn){
         return 'snapback'
     }
-    if (example.moves[idx].start === source && example.moves[idx].end === target) {
-        board.move(example.moves[idx].start, example.moves[idx].end)
+    if (puzzle.moves[idx].start === source && puzzle.moves[idx].end === target) {
+        board.move(puzzle.moves[idx].start, puzzle.moves[idx].end)
         idx++
-        if (idx === example.moves.length) {
+        if (idx === puzzle.moves.length) {
           console.log("Puzzle solved")
         }
         playerTurn = false;
@@ -57,13 +58,37 @@ function onDrop (source, target, piece, newPos, oldPos, orientation) {
     }
 }
 
-var board = Chessboard('myBoard', {
-    position: example.startingPostion,
+function setInitialBoardState() {
+  let board = ChessBoard('myBoard', {
+    position: 'start',
     moveSpeed: 'slow',
     showNotation: true,
     draggable: true,
     onDrop: onDrop,
-})
+  });
+  return board;
+}
+
+function updateBoard(payload) {
+  puzzle = JSON.parse(payload);
+  console.log(puzzle);
+  board.position(puzzle.startingPosition);
+  board.orientation(puzzle.orientation);
+}
+
+function loadPuzzle() {
+  let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4) {
+      updateBoard(xhr.responseText);
+    }
+  }
+  xhr.overrideMimeType("application/json");
+  xhr.open("GET", "/api/load-puzzle", true);
+  xhr.send();
+}
+
+let board = setInitialBoardState();
 // --- End Example JS ----------------------------------------------------------
 </script>
 </body>

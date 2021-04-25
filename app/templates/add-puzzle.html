@@ -23,41 +23,128 @@
 <!--- End Example HTML -------------------------------------------------------->
 <button id="resetPosition" type="button" onclick="resetPosition()">Reset Position</button>
 
+<div id="position">
+
+</div>
+<button onclick="savePuzzle()">Save Position</button>
 <script src="js/jquery-3.4.1.min.js"></script>
 <script src="js/chessboard-1.0.0.js" ></script>
+<script src="js/chess.js"></script>
 <script>
+let lastMove = null;
+
 let puzzleToSave = {
+    name: "Chess Puzzle",
+    startingPosition: "",
     moves: [],
+    orientation: 'white'
+}
+
+function cleanPositionInfo() {
+  const domNode = document.getElementById("position");
+  domNode.innerHTML = '';
+}
+
+function updatePositionInformation(fen) {
+  let startingPosText = document.getElementById("position");
+  let paragraph = document.createElement("p");
+  let text = document.createTextNode("Starting FEN: " + fen);
+  paragraph.appendChild(text);
+  startingPosText.appendChild(paragraph);
+}
+
+function addMovesToSummary(piece, target) {
+  let startingPosText = document.getElementById("position");
+  let para = document.createElement("p");
+  let text = document.createTextNode(piece[1] + target);
+  para.appendChild(text);
+  startingPosText.appendChild(para);
+}
+
+function savePuzzle() {
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", "/api/save-puzzle")
+  xhr.send(JSON.stringify(puzzleToSave));
+}
+
+function validateMove(source, target, piece) {
+  console.log(source, target);
+  const moveStatus = game.move({
+    from: source,
+    to: target,
+    promotion: 'q' // NOTE: always promote to a queen for example simplicity
+  });
+  console.log(moveStatus);
+  if (moveStatus == null) {
+    return false;
+  }
+  if (lastMove == null) {
+    return true;
+  }
+  const color = piece[0];
+  return color !== lastMove;
+}
+
+function determineOrientation(gameState) {
+  return (gameState.turn() === 'w') ? 'white' : 'black'
 }
 
 function updatePuzzle(event) {
     let puzzleName = event.target.elements.title.value;
     let startPos = event.target.elements.starting.value;
     if (puzzleName.length === 0 || startPos.length === 0) {
-        alert("Both title and starting position must be set!")
+        alert("Both title and starting position must be set!");
+        return;
     }
+    if (game.validate_fen(startPos) === false) {
+      alert("Invalid FEN");
+      // TODO - Alert when FEN does not have move information;
+      return;
+    }
+    game = new Chess(startPos);
+    board.position(startPos);
+    const orientation = determineOrientation(game)
+    board.orientation(orientation)
     puzzleToSave.name = puzzleName;
     puzzleToSave.startingPosition = startPos;
-    board.position(puzzleToSave.startingPosition);
+    puzzleToSave.orientation = orientation;
+    cleanPositionInfo();
+    updatePositionInformation(startPos);
 }
 
 function resetPosition() {
     board.position('start');
-    puzzleToSave = {moves: []};
+    puzzleToSave = {
+      startingPosition: board.fen(),
+      moves: []
+    };
+    cleanPositionInfo();
 }
 
 function onDrop (source, target, piece, newPos, oldPos, orientation) {
+    const isValid = validateMove(source, target, piece);
+    if (!isValid) {
+      return 'snapback';
+    }
     puzzleToSave.moves.push({
         "start": source, "end": target
     });
+    addMovesToSummary(piece, target);
+    lastMove = piece[0];
 }
 
-var board = Chessboard('myBoard', {
+function setInitialBoardState() {
+  let board = ChessBoard('myBoard', {
     position: 'start',
     showNotation: true,
     draggable: true,
     onDrop: onDrop,
-})
+  });
+  return board;
+}
+
+let board = setInitialBoardState();
+let game = new Chess();
 // --- End Example JS ----------------------------------------------------------
 </script>
 </body>
