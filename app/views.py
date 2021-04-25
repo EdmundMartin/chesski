@@ -61,4 +61,5 @@ def load_puzzle():
     response['startingPosition'] = puzzle.starting_position
     response['orientation'] = puzzle.orientation
     response['moves'] = json.loads(puzzle.moves)
+    print(response['moves'])
     return jsonify(response)

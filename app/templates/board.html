@@ -14,6 +14,9 @@
 <div id="myBoard" style="width: 400px"></div>
 <!--- End Example HTML -------------------------------------------------------->
 <button onclick="loadPuzzle()">Next Puzzle</button>
+<div id="status">
+
+</div>
 
 <script src="js/jquery-3.4.1.min.js"></script>
 <script src="js/chessboard-1.0.0.js" ></script>
@@ -22,16 +25,28 @@
 
 let idx = 0
 let playerTurn = true;
-let puzzle = {
-    "startingPostion": "r1bq1rk1/pppp1pp1/2n4p/2b1p3/2B1P1n1/2NP1N2/PPPB1PPP/R2Q1RK1 b - - 3 8",
-    "moves": [
-        {"start": "f3", "end": "e5"},
-        {"start": "f7", "end": "f6"},
-    ]
+let puzzle = {}
+
+function puzzleSuccess() {
+  let startingPosText = document.getElementById("status");
+  let para = document.createElement("p");
+  // TODO - Update database with success
+  let text = document.createTextNode("Puzzle Solved & Progress Updated!");
+  para.appendChild(text);
+  startingPosText.appendChild(para);
+}
+
+function puzzleFail(correct, actual) {
+  let startingPostText = document.getElementById("status");
+  let para = document.createElement("p");
+  // TODO - Update database with failure
+  let text = document.createTextNode(`Puzzle Failed, Correct Move ${correct}: Actual Move: ${actual}\n Progress Updated.`);
+  para.appendChild(text);
+  startingPostText.appendChild(para);
 }
 
 function computesMove () {
-  if (playerTurn === false || idx < puzzle.moves.length) {
+  if (playerTurn === false && idx < puzzle.moves.length) {
     let computersMove = puzzle.moves[idx];
     board.move(computersMove.start + "-" + computersMove.end);
     playerTurn = true;
@@ -47,14 +62,14 @@ function onDrop (source, target, piece, newPos, oldPos, orientation) {
         board.move(puzzle.moves[idx].start, puzzle.moves[idx].end)
         idx++
         if (idx === puzzle.moves.length) {
-          console.log("Puzzle solved")
+          puzzleSuccess();
         }
         playerTurn = false;
-        computesMove();
-        return;
+        window.setTimeout(computesMove, 1000);
     } else {
         console.log("Wrong move!")
-        return 'snapback'
+        puzzleFail(puzzle.moves[idx].end, target);
+        playerTurn = false;
     }
 }
 

@@ -108,6 +108,7 @@ function updatePuzzle(event) {
     puzzleToSave.name = puzzleName;
     puzzleToSave.startingPosition = startPos;
     puzzleToSave.orientation = orientation;
+    puzzleToSave.moves = [];
     cleanPositionInfo();
     updatePositionInformation(startPos);
 }
