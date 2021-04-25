@@ -1,0 +1,64 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <title>chessboardjs Example #1001 - Start Position</title>
+  <base href="../" />
+  <link rel="stylesheet" href="css/chessboard-1.0.0.css">
+</head>
+<body>
+
+<form id="puzzleDetails" onsubmit="updatePuzzle(event); return false;">
+  <label for="title">Position Title:</label><br>
+  <input type="text" id="title" name="title"><br>
+  <label for="starting">Starting FEN Position:</label><br>
+  <input type="text" id="starting" name="starting">
+  <input type="submit" value="Submit">
+</form>
+
+<!--- Begin Example HTML ------------------------------------------------------>
+<div id="myBoard" style="width: 400px"></div>
+<!--- End Example HTML -------------------------------------------------------->
+<button id="resetPosition" type="button" onclick="resetPosition()">Reset Position</button>
+
+<script src="js/jquery-3.4.1.min.js"></script>
+<script src="js/chessboard-1.0.0.js" ></script>
+<script>
+let puzzleToSave = {
+    moves: [],
+}
+
+function updatePuzzle(event) {
+    let puzzleName = event.target.elements.title.value;
+    let startPos = event.target.elements.starting.value;
+    if (puzzleName.length === 0 || startPos.length === 0) {
+        alert("Both title and starting position must be set!")
+    }
+    puzzleToSave.name = puzzleName;
+    puzzleToSave.startingPosition = startPos;
+    board.position(puzzleToSave.startingPosition);
+}
+
+function resetPosition() {
+    board.position('start');
+    puzzleToSave = {moves: []};
+}
+
+function onDrop (source, target, piece, newPos, oldPos, orientation) {
+    puzzleToSave.moves.push({
+        "start": source, "end": target
+    });
+}
+
+var board = Chessboard('myBoard', {
+    position: 'start',
+    showNotation: true,
+    draggable: true,
+    onDrop: onDrop,
+})
+// --- End Example JS ----------------------------------------------------------
+</script>
+</body>
+</html>
