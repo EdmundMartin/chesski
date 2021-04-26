@@ -1,7 +1,11 @@
 import json
-from flask import render_template, send_from_directory, request, jsonify
+from datetime import datetime
+
+from flask import send_from_directory, request, jsonify
+
 from app import app, db
 from app.models import ChessPuzzle
+from app.sm_algorithm import SuperMemoAlgorithm
 
 
 @app.route('/css/<path:path>')
@@ -31,21 +35,12 @@ def add_puzzle():
 
 @app.route('/api/save-puzzle', methods=['POST'])
 def save_puzzle():
+    # TODO - Set mime type to application/json to leverage Flask built ins
     payload = json.loads(request.data)
-    print(payload)
     name = payload['name']
     starting_position = payload['startingPosition']
     moves = json.dumps(payload['moves'])
     orientation = payload['orientation']
-    """
-    puzzle_name = db.Column(db.String(265))
-    starting_position = db.Column(db.String(265))
-    orientation = db.Column(db.String(12))
-    moves = db.Column(db.Text)
-    
-    puzzle = ChessPuzzle(puzzle_name=name, starting_position=starting_position, moves=moves,
-                         orientation=)
-    """
     puzzle = ChessPuzzle(puzzle_name=name, starting_position=starting_position, moves=moves,
                          orientation=orientation)
     db.session.add(puzzle)
@@ -56,10 +51,21 @@ def save_puzzle():
 @app.route('/api/load-puzzle', methods=['GET'])
 def load_puzzle():
     puzzle: ChessPuzzle = ChessPuzzle.query.first()
-    response = {}
-    response['name'] = puzzle.puzzle_name
-    response['startingPosition'] = puzzle.starting_position
-    response['orientation'] = puzzle.orientation
-    response['moves'] = json.loads(puzzle.moves)
-    print(response['moves'])
-    return jsonify(response)
+    return jsonify(puzzle.for_solving())
+
+
+@app.route('/api/passed-puzzle/<int:puzzle_id>', methods=['POST'])
+def update_status(puzzle_id):
+    puzzle: ChessPuzzle = ChessPuzzle.query.get(puzzle_id)
+    print(puzzle)
+    if puzzle.repetitions is None:
+        super_memo: SuperMemoAlgorithm = SuperMemoAlgorithm.first_review(5)
+    else:
+        super_memo: SuperMemoAlgorithm = SuperMemoAlgorithm(puzzle.ease, puzzle.interval, puzzle.repetitions)
+        super_memo.review(5, datetime.now())
+    puzzle.repetitions = super_memo.repetitions
+    puzzle.ease = super_memo.ease
+    puzzle.interval = super_memo.interval
+    puzzle.next_review_due = super_memo.review_date
+    db.session.commit()
+    return ''

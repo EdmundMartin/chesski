@@ -31,6 +31,7 @@ function puzzleSuccess() {
   let startingPosText = document.getElementById("status");
   let para = document.createElement("p");
   // TODO - Update database with success
+  passedPuzzle(puzzle.id);
   let text = document.createTextNode("Puzzle Solved & Progress Updated!");
   para.appendChild(text);
   startingPosText.appendChild(para);
@@ -100,6 +101,12 @@ function loadPuzzle() {
   }
   xhr.overrideMimeType("application/json");
   xhr.open("GET", "/api/load-puzzle", true);
+  xhr.send();
+}
+
+function passedPuzzle(puzzleId) {
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", `/api/passed-puzzle/${puzzleId}`);
   xhr.send();
 }
 

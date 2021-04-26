@@ -8,13 +8,14 @@ class SuperMemoAlgorithm:
     def __init__(self, ease: float, interval: int, repetitions: int) -> None:
         self.ease = ease
         self.interval = interval
-        self.repetitions = repetitions
+        self.repetitions = repetitions if repetitions else 0
         self.review_date: Optional[datetime] = None
 
     @classmethod
     def first_review(cls, quality: int) -> 'SuperMemoAlgorithm':
         space_rep = cls(2.5, 0, 0)
-        return space_rep.review(quality, datetime.now())
+        space_rep.review(quality, datetime.now())
+        return space_rep
 
     def _calculate_interval_reps(self, quality: int) -> Tuple[float, int]:
         if quality < 3:
