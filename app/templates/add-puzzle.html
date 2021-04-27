@@ -18,9 +18,7 @@
   <input type="submit" value="Submit">
 </form>
 
-<!--- Begin Example HTML ------------------------------------------------------>
 <div id="myBoard" style="width: 400px"></div>
-<!--- End Example HTML -------------------------------------------------------->
 <button id="resetPosition" type="button" onclick="resetPosition()">Reset Position</button>
 
 <div id="position">
@@ -135,18 +133,16 @@ function onDrop (source, target, piece, newPos, oldPos, orientation) {
 }
 
 function setInitialBoardState() {
-  let board = ChessBoard('myBoard', {
+  return ChessBoard('myBoard', {
     position: 'start',
     showNotation: true,
     draggable: true,
     onDrop: onDrop,
   });
-  return board;
 }
 
 let board = setInitialBoardState();
 let game = new Chess();
-// --- End Example JS ----------------------------------------------------------
 </script>
 </body>
 </html>

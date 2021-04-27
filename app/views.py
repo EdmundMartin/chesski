@@ -50,19 +50,34 @@ def save_puzzle():
 
 @app.route('/api/load-puzzle', methods=['GET'])
 def load_puzzle():
-    puzzle: ChessPuzzle = ChessPuzzle.query.first()
+    puzzle: ChessPuzzle = ChessPuzzle.query.order_by(ChessPuzzle.next_review_due).first()
     return jsonify(puzzle.for_solving())
 
 
 @app.route('/api/passed-puzzle/<int:puzzle_id>', methods=['POST'])
-def update_status(puzzle_id):
+def puzzle_passed(puzzle_id: int):
     puzzle: ChessPuzzle = ChessPuzzle.query.get(puzzle_id)
-    print(puzzle)
     if puzzle.repetitions is None:
         super_memo: SuperMemoAlgorithm = SuperMemoAlgorithm.first_review(5)
     else:
         super_memo: SuperMemoAlgorithm = SuperMemoAlgorithm(puzzle.ease, puzzle.interval, puzzle.repetitions)
         super_memo.review(5, datetime.now())
+    puzzle.repetitions = super_memo.repetitions
+    puzzle.ease = super_memo.ease
+    puzzle.interval = super_memo.interval
+    puzzle.next_review_due = super_memo.review_date
+    db.session.commit()
+    return ''
+
+
+@app.route('/api/failed-puzzle/<int:puzzle_id>', methods=['POST'])
+def puzzle_failed(puzzle_id: int):
+    puzzle: ChessPuzzle = ChessPuzzle.query.get(puzzle_id)
+    if puzzle.repetitions is None:
+        super_memo: SuperMemoAlgorithm = SuperMemoAlgorithm.first_review(0)
+    else:
+        super_memo: SuperMemoAlgorithm = SuperMemoAlgorithm(puzzle.ease, puzzle.interval, puzzle.repetitions)
+        super_memo.review(0, datetime.now())
     puzzle.repetitions = super_memo.repetitions
     puzzle.ease = super_memo.ease
     puzzle.interval = super_memo.interval
