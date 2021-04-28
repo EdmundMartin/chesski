@@ -4,7 +4,6 @@ from typing import Optional, Tuple
 
 
 class SuperMemoAlgorithm:
-
     def __init__(self, ease: float, interval: int, repetitions: int) -> None:
         self.ease = ease
         self.interval = interval
@@ -12,7 +11,7 @@ class SuperMemoAlgorithm:
         self.review_date: Optional[datetime] = None
 
     @classmethod
-    def first_review(cls, quality: int) -> 'SuperMemoAlgorithm':
+    def first_review(cls, quality: int) -> "SuperMemoAlgorithm":
         space_rep = cls(2.5, 0, 0)
         space_rep.review(quality, datetime.now())
         return space_rep
@@ -35,3 +34,6 @@ class SuperMemoAlgorithm:
         self.ease = max(1.3, self.ease)
 
         self.review_date = review_date + timedelta(self.interval)
+
+    def __repr__(self):
+        return f"<SuperMemo, Ease: {self.ease}, Reps: {self.repetitions}, Interval:{self.interval}>"

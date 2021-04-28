@@ -15,12 +15,19 @@ class ChessPuzzle(db.Model):
     interval = db.Column(db.Float, nullable=True)
     next_review_due = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     moves = db.Column(db.Text)
+    # TODO Add foreign key onto course - to organise puzzles
 
     def for_solving(self) -> Dict[str, Any]:
         response = dict()
-        response['id'] = self.id
-        response['name'] = self.puzzle_name
-        response['startingPosition'] = self.starting_position
-        response['orientation'] = self.orientation
-        response['moves'] = json.loads(self.moves)
+        response["id"] = self.id
+        response["name"] = self.puzzle_name
+        response["startingPosition"] = self.starting_position
+        response["orientation"] = self.orientation
+        response["moves"] = json.loads(self.moves)
         return response
+
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(265))
+    description = db.Column(db.Text)
