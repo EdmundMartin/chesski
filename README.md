@@ -16,3 +16,8 @@ flask run
 * Add support for multiple users/ability to share positions
 * Add support for running application in production environment
 * Add fully featured frontend using modern front-end framework.
+
+## Run from Docker
+```
+docker run -p 8080:8080 image_name/hash
+```
