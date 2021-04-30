@@ -60,19 +60,19 @@ function addMovesToSummary(piece, target) {
 }
 
 function savePuzzle() {
+  // TODO - If starting position is empty set to board initial state
   let xhr = new XMLHttpRequest();
-  xhr.open("POST", "/api/save-puzzle")
+  xhr.open("POST", "/api/save-puzzle");
+  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   xhr.send(JSON.stringify(puzzleToSave));
 }
 
 function validateMove(source, target, piece) {
-  console.log(source, target);
   const moveStatus = game.move({
     from: source,
     to: target,
     promotion: 'q' // NOTE: always promote to a queen for example simplicity
   });
-  console.log(moveStatus);
   if (moveStatus == null) {
     return false;
   }
@@ -113,6 +113,7 @@ function updatePuzzle(event) {
 
 function resetPosition() {
     board.position('start');
+    game = new Chess();
     puzzleToSave = {
       startingPosition: board.fen(),
       moves: []

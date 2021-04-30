@@ -1,11 +1,14 @@
-import json
 from datetime import datetime
+import json
+from typing import Any, Dict
 
 from flask import send_from_directory, request, jsonify
+from marshmallow.exceptions import ValidationError
 
 from app import app, db
 from app.models import ChessPuzzle
 from app.sm_algorithm import SuperMemoAlgorithm
+from app.serializers import PuzzleSchema
 
 
 @app.route("/css/<path:path>")
@@ -35,21 +38,19 @@ def add_puzzle():
 
 @app.route("/api/save-puzzle", methods=["POST"])
 def save_puzzle():
-    # TODO - Set mime type to application/json to leverage Flask built ins
-    payload = json.loads(request.data)
-    name = payload["name"]
-    starting_position = payload["startingPosition"]
-    moves = json.dumps(payload["moves"])
-    orientation = payload["orientation"]
+    try:
+        result: Dict[str, Any] = PuzzleSchema().load(request.json)
+    except ValidationError:
+        return jsonify({"status": "failure", "message": "Invalid payload"}), 400
     puzzle = ChessPuzzle(
-        puzzle_name=name,
-        starting_position=starting_position,
-        moves=moves,
-        orientation=orientation,
+        puzzle_name=result["name"],
+        starting_position=result["starting_position"],
+        moves=json.dumps(result["moves"]),
+        orientation=result["orientation"],
     )
     db.session.add(puzzle)
     db.session.commit()
-    return ""
+    return jsonify({"status": "success"}), 201
 
 
 @app.route("/api/load-puzzle", methods=["GET"])
@@ -75,6 +76,7 @@ def puzzle_passed(puzzle_id: int):
     puzzle.interval = super_memo.interval
     puzzle.next_review_due = super_memo.review_date
     db.session.commit()
+    # TODO - JSON Response to be used by front end
     return ""
 
 
@@ -93,4 +95,5 @@ def puzzle_failed(puzzle_id: int):
     puzzle.interval = super_memo.interval
     puzzle.next_review_due = super_memo.review_date
     db.session.commit()
+    # TODO - JSON Response to be used by front end
     return ""
