@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from typing import Any, Dict
 
-from flask import send_from_directory, request, jsonify
+from flask import send_from_directory, request, jsonify, redirect
 from marshmallow.exceptions import ValidationError
 
 from app import app, db
@@ -96,4 +96,4 @@ def puzzle_failed(puzzle_id: int):
     puzzle.next_review_due = super_memo.review_date
     db.session.commit()
     # TODO - JSON Response to be used by front end
-    return ""
+    return jsonify({"status": "success"}), 201

@@ -1,7 +1,16 @@
-from app import db
 from datetime import datetime
 from typing import Any, Dict
 import json
+
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from app import db, login
+
+
+@login.user_loader
+def load_user(user_id: str):
+    return User.query.get(int(user_id))
 
 
 class ChessPuzzle(db.Model):
@@ -31,3 +40,16 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(265))
     description = db.Column(db.Text)
+
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), index=True, unique=True)
+    email = db.Column(db.String(120), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+
+    def set_password(self, password: str) -> None:
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> None:
+        return check_password_hash(self.password_hash, password)

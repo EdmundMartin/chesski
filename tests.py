@@ -1,4 +1,3 @@
-from datetime import datetime
 from app import app, db, models
 import unittest
 
