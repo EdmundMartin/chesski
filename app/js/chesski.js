@@ -36,6 +36,13 @@ function movePieceToPosition(board, start, end, pieceInfo) {
     board.position(positionObject);
 }
 
+function replacePiece(board, square, piece) {
+    let positionObject = board.position();
+    delete positionObject[square];
+    positionObject[square] = piece;
+    board.position(positionObject);
+}
+
 function castleRook(board, targetSquare) {
     if (targetSquare === 'g1') {
         movePieceToPosition(board, "h1", "f1", "wR");

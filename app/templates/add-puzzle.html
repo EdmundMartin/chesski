@@ -151,7 +151,12 @@ function onDrop (source, target, piece, newPos, oldPos, orientation) {
       castleRook(board, target);
     }
     if (isPromotion(piece, target)) {
-      console.log("Implement auto queen!")
+      window.setTimeout(function () {
+        console.log(board.position())
+        let tempPosition = board.position();
+        tempPosition[target] = piece[0] + "Q";
+        board.position(tempPosition);
+      }, 250);
     }
     puzzleToSave.moves.push({
         "start": source, "end": target

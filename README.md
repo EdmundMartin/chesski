@@ -21,3 +21,9 @@ flask run
 ```
 docker run -p 8080:8080 image_name/hash
 ```
+
+# TODO
+* Support non-auto queening to support puzzles where promoting to a Queen is incorrect
+* Refactor JS
+* Add more attractive front end
+* Associate puzzles with users/courses
