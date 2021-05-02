@@ -16,8 +16,9 @@
 
 </div>
 
-<script src="js/jquery-3.4.1.min.js"></script>
-<script src="js/chessboard-1.0.0.js" ></script>
+<script src="/js/jquery-3.4.1.min.js"></script>
+<script src="/js/chessboard-1.0.0.js" ></script>
+<script src="/js/chesski.js"></script>
 <script>
 
 let idx = 0
@@ -53,7 +54,7 @@ function computesMove () {
 }
 
 function onDrop (source, target, piece, newPos, oldPos, orientation) {
-    if (!playerTurn){
+    if (!playerTurn || Object.keys(puzzle).length === 0){
         return 'snapback'
     }
     if (puzzle.moves[idx].start === source && puzzle.moves[idx].end === target) {

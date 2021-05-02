@@ -2,8 +2,10 @@
 const blackCastleSquares = ["g8", "c8"];
 const whiteCastleSquares = ["g1", "c1"]
 
-function isPromotion(color, piece, targetSquare) {
-    if (piece !== 'p') {
+function isPromotion(piece, targetSquare) {
+    let color = piece[0];
+    let pieceName = piece[1];
+    if (pieceName !== 'P') {
         return false;
     }
     if (color === 'b' && targetSquare[1] === "1") {
@@ -13,19 +15,41 @@ function isPromotion(color, piece, targetSquare) {
     }
 }
 
-function isCastle(color, piece, sourceSquare, targetSquare) {
-    if (piece !== 'k') {
+function isCastle(piece, sourceSquare, targetSquare) {
+    let color = piece[0];
+    let pieceName = piece[1];
+    if (pieceName !== 'K') {
         return false;
     }
-    let spacesMoved = Math.abs(Number(sourceSquare[1]) - Number(targetSquare[1]))
-    if (spacesMoved !== 2) {
-        return false;
-    }
-    if (color === 'b' && blackCastleSquares.includes(targetSquare)) {
+    if (color === 'b' && sourceSquare === 'e8' && blackCastleSquares.includes(targetSquare)) {
         return true;
     }
-    if (color === 'w' && whiteCastleSquares.includes(targetSquare)) {
+    if (color === 'w' && sourceSquare === 'e1' && whiteCastleSquares.includes(targetSquare)) {
         return true;
+    }
+}
+
+function movePieceToPosition(board, start, end, pieceInfo) {
+    let positionObject = board.position();
+    delete positionObject[start];
+    positionObject[end] = pieceInfo;
+    board.position(positionObject);
+}
+
+function castleRook(board, targetSquare) {
+    if (targetSquare === 'g1') {
+        movePieceToPosition(board, "h1", "f1", "wR");
+        return;
+    }
+    if (targetSquare === "c1") {
+        movePieceToPosition(board, "a1", "d1", "wR");
+        return;
+    }
+    if (targetSquare === "g8") {
+        movePieceToPosition(board, "h8", "f8", "bR");
+    }
+    if (targetSquare === "c8") {
+        movePieceToPosition(board, "a8", "d8", "bR");
     }
 }
 

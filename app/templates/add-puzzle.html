@@ -7,6 +7,7 @@
   <title>chessboardjs Example #1001 - Start Position</title>
   <base href="../" />
   <link rel="stylesheet" href="css/chessboard-1.0.0.css">
+  <link rel="stylesheet" href="/css/chesski.css">
 </head>
 <body>
 
@@ -19,15 +20,33 @@
 </form>
 
 <div id="myBoard" style="width: 400px"></div>
+<p>
 <button id="resetPosition" type="button" onclick="resetPosition()">Reset Position</button>
-
+</p>
+<p>
+<button id="useAsStart" type="button" onclick="useAsStartingPosition()">Use As Starting Position</button>
+</p>
 <div id="position">
 
 </div>
 <button onclick="savePuzzle()">Save Position</button>
+
+<!--
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <p>Select Promotion Piece:</p>
+    <img class="promote" src="/img/chesspieces/wikipedia/wQ.png" alt="q" />
+    <img class="promote" src="/img/chesspieces/wikipedia/wR.png" alt="r" />
+    <img class="promote" src="/img/chesspieces/wikipedia/wN.png" alt="n" />
+    <img class="promote" src="/img/chesspieces/wikipedia/wB.png" alt="b" />
+  </div>
+</div>
+-->
 <script src="js/jquery-3.4.1.min.js"></script>
 <script src="js/chessboard-1.0.0.js" ></script>
 <script src="js/chess.js"></script>
+<script src="js/chesski.js"></script>
 <script>
 let lastMove = null;
 
@@ -67,6 +86,7 @@ function savePuzzle() {
   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   xhr.send(JSON.stringify(puzzleToSave));
 }
+
 
 function validateMove(source, target, piece) {
   const moveStatus = game.move({
@@ -127,11 +147,25 @@ function onDrop (source, target, piece, newPos, oldPos, orientation) {
     if (!isValid) {
       return 'snapback';
     }
+    if (isCastle(piece, source, target)) {
+      castleRook(board, target);
+    }
+    if (isPromotion(piece, target)) {
+      console.log("Implement auto queen!")
+    }
     puzzleToSave.moves.push({
         "start": source, "end": target
     });
     addMovesToSummary(piece, target);
     lastMove = piece[0];
+}
+
+function useAsStartingPosition() {
+  puzzleToSave.startingPosition = game.fen();
+  puzzleToSave.moves = [];
+  puzzleToSave.orientation = determineOrientation(game);
+  cleanPositionInfo();
+  updatePositionInformation(game.fen());
 }
 
 function setInitialBoardState() {

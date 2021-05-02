@@ -30,7 +30,6 @@ def send_pieces(path):
 @app.route("/")
 @login_required
 def puzzles():
-    print(request.cookies)
     return send_from_directory("templates", "board.html")
 
 
