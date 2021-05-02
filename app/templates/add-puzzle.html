@@ -63,6 +63,7 @@ function savePuzzle() {
   // TODO - If starting position is empty set to board initial state
   let xhr = new XMLHttpRequest();
   xhr.open("POST", "/api/save-puzzle");
+  xhr.withCredentials = true;
   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   xhr.send(JSON.stringify(puzzleToSave));
 }

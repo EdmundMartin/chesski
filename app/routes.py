@@ -3,6 +3,7 @@ import json
 from typing import Any, Dict
 
 from flask import send_from_directory, request, jsonify, redirect
+from flask_login import login_required
 from marshmallow.exceptions import ValidationError
 
 from app import app, db
@@ -27,16 +28,20 @@ def send_pieces(path):
 
 
 @app.route("/")
+@login_required
 def puzzles():
+    print(request.cookies)
     return send_from_directory("templates", "board.html")
 
 
 @app.route("/add-puzzle")
+@login_required
 def add_puzzle():
     return send_from_directory("templates", "add-puzzle.html")
 
 
 @app.route("/api/save-puzzle", methods=["POST"])
+@login_required
 def save_puzzle():
     try:
         result: Dict[str, Any] = PuzzleSchema().load(request.json)
@@ -54,14 +59,18 @@ def save_puzzle():
 
 
 @app.route("/api/load-puzzle", methods=["GET"])
+@login_required
 def load_puzzle():
     puzzle: ChessPuzzle = ChessPuzzle.query.order_by(
         ChessPuzzle.next_review_due
     ).first()
+    if puzzle is None:
+        return jsonify({'error': "No puzzles in database"}), 400
     return jsonify(puzzle.for_solving())
 
 
 @app.route("/api/passed-puzzle/<int:puzzle_id>", methods=["POST"])
+@login_required
 def puzzle_passed(puzzle_id: int):
     puzzle: ChessPuzzle = ChessPuzzle.query.get(puzzle_id)
     if puzzle.repetitions is None:
@@ -76,11 +85,11 @@ def puzzle_passed(puzzle_id: int):
     puzzle.interval = super_memo.interval
     puzzle.next_review_due = super_memo.review_date
     db.session.commit()
-    # TODO - JSON Response to be used by front end
-    return ""
+    return jsonify({"status": "success"})
 
 
 @app.route("/api/failed-puzzle/<int:puzzle_id>", methods=["POST"])
+@login_required
 def puzzle_failed(puzzle_id: int):
     puzzle: ChessPuzzle = ChessPuzzle.query.get(puzzle_id)
     if puzzle.repetitions is None:
@@ -95,5 +104,4 @@ def puzzle_failed(puzzle_id: int):
     puzzle.interval = super_memo.interval
     puzzle.next_review_due = super_memo.review_date
     db.session.commit()
-    # TODO - JSON Response to be used by front end
     return jsonify({"status": "success"}), 201

@@ -4,8 +4,10 @@ import json
 
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, SignatureExpired, BadSignature
 
 from app import db, login
+from config import Config
 
 
 @login.user_loader

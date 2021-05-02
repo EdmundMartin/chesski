@@ -99,12 +99,14 @@ function loadPuzzle() {
   }
   xhr.overrideMimeType("application/json");
   xhr.open("GET", "/api/load-puzzle", true);
+  xhr.withCredentials = true;
   xhr.send();
 }
 
 function passedPuzzle(puzzleId) {
   let xhr = new XMLHttpRequest();
   xhr.open("POST", `/api/passed-puzzle/${puzzleId}`);
+  xhr.withCredentials = true;
   xhr.send();
 }
 
