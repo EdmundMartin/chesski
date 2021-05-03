@@ -2,14 +2,22 @@ from datetime import datetime
 import json
 from typing import Any, Dict
 
-from flask import send_from_directory, request, jsonify, redirect
-from flask_login import login_required
+from flask import (
+    send_from_directory,
+    request,
+    jsonify,
+    redirect,
+    render_template,
+    url_for,
+)
+from flask_login import login_required, current_user
 from marshmallow.exceptions import ValidationError
 
 from app import app, db
-from app.models import ChessPuzzle
+from app.models import ChessPuzzle, Course
 from app.sm_algorithm import SuperMemoAlgorithm
 from app.serializers import PuzzleSchema
+from app.forms import CourseForm
 
 
 @app.route("/css/<path:path>")
@@ -39,6 +47,31 @@ def add_puzzle():
     return send_from_directory("templates", "add-puzzle.html")
 
 
+@app.route("/create-course", methods=["GET", "POST"])
+@login_required
+def create_course():
+    user_id: int = current_user.id
+    form = CourseForm()
+    if form.validate_on_submit():
+        created_course = Course(
+            name=form.name.data,
+            creator=user_id,
+            public=form.public.data,
+            description=form.description.data,
+        )
+        db.session.add(created_course)
+        db.session.commit()
+        return redirect(url_for("puzzles"))
+    return render_template("create-course.html", form=form)
+
+
+@app.route("/my-courses", methods=["GET", "POST"])
+@login_required
+def course_list():
+    all_courses = Course.courses_for_user(current_user.id)
+    return render_template("list-courses.html", courses=all_courses)
+
+
 @app.route("/api/save-puzzle", methods=["POST"])
 @login_required
 def save_puzzle():
@@ -64,7 +97,7 @@ def load_puzzle():
         ChessPuzzle.next_review_due
     ).first()
     if puzzle is None:
-        return jsonify({'error': "No puzzles in database"}), 400
+        return jsonify({"error": "No puzzles in database"}), 400
     return jsonify(puzzle.for_solving())
 
 

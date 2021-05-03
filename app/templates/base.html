@@ -7,8 +7,19 @@
         <script src="/js/jquery-3.4.1.min.js"></script>
         <script src="/js/chessboard-1.0.0.js" ></script>
         <script src="/js/chesski.js"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
     <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Chesski</a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="/add-puzzle">Add Puzzles</a></li>
+            <li class="nav-item"><a class="nav-link" href="/my-courses">My Courses</a></li>
+            <li class="nav-item"><a class="nav-link" href="/create-course">Create Course</a></li>
+            <li class="nav-item"><a class="nav-link" href="/">Browse Courses</a></li>
+        </ul>
+    </nav>
     {% block content %}
 
     {% endblock %}

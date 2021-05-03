@@ -1,13 +1,11 @@
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 import json
 
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, SignatureExpired, BadSignature
 
 from app import db, login
-from config import Config
 
 
 @login.user_loader
@@ -26,6 +24,7 @@ class ChessPuzzle(db.Model):
     interval = db.Column(db.Float, nullable=True)
     next_review_due = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     moves = db.Column(db.Text)
+
     # TODO Add foreign key onto course - to organise puzzles
 
     def for_solving(self) -> Dict[str, Any]:
@@ -41,7 +40,14 @@ class ChessPuzzle(db.Model):
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(265))
+    creator = db.Column(db.Integer, db.ForeignKey("user.id"))
+    public = db.Column(db.Boolean)
     description = db.Column(db.Text)
+
+    @staticmethod
+    def courses_for_user(user_id: int) -> List['Course']:
+        courses = Course.query.filter(Course.creator == user_id).all()
+        return courses
 
 
 class User(UserMixin, db.Model):

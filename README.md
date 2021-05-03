@@ -27,3 +27,4 @@ docker run -p 8080:8080 image_name/hash
 * Refactor JS
 * Add more attractive front end
 * Associate puzzles with users/courses
+* Fix tests now login is required
