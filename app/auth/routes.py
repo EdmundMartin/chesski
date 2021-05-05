@@ -42,3 +42,9 @@ def register():
         flash("Congratulations ou are now a registered user!")
         return redirect(url_for("auth.login"))
     return render_template("auth/register.html", title="Register", form=form)
+
+
+@bp.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('auth.login'))
