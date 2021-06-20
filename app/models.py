@@ -17,6 +17,8 @@ class ChessPuzzle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     puzzle_name = db.Column(db.String(265))
     starting_position = db.Column(db.String(265))
+    start_text = db.Column(db.Text, nullable=True)
+    post_test = db.Column(db.Text, nullable=True)
     orientation = db.Column(db.String(12))
     # TODO Move to postgres to make use of JSON format
     ease = db.Column(db.Float, nullable=True)
