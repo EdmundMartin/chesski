@@ -20,6 +20,7 @@
 </form>
 
 <div id="myBoard" style="width: 400px"></div>
+<div id="status"></div>
 <p>
 <button id="resetPosition" type="button" onclick="resetPosition()">Reset Position</button>
 </p>
@@ -78,9 +79,23 @@ function addMovesToSummary(piece, target) {
   startingPosText.appendChild(para);
 }
 
+function statusMsg(msg, duration) {
+  const element = document.getElementById("status");
+  element.innerHTML = msg;
+  setTimeout(function () {
+    element.innerHTML = '';
+  }, duration);
+}
+
 function savePuzzle() {
   // TODO - If starting position is empty set to board initial state
   let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 201) {
+      resetPosition();
+      statusMsg("Puzzle Saved!", 5000);
+    }
+  }
   xhr.open("POST", "/api/save-puzzle");
   xhr.withCredentials = true;
   xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -139,6 +154,7 @@ function resetPosition() {
       startingPosition: board.fen(),
       moves: []
     };
+    lastMove = null;
     cleanPositionInfo();
 }
 
