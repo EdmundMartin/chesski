@@ -1,38 +1,49 @@
-
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <title>chessboardjs Example #1001 - Start Position</title>
-  <base href="../" />
-  <link rel="stylesheet" href="css/chessboard-1.0.0.css">
-  <link rel="stylesheet" href="/css/chesski.css">
-</head>
-<body>
 
-<form id="puzzleDetails" onsubmit="updatePuzzle(event); return false;">
-  <label for="title">Position Title:</label><br>
-  <input type="text" id="title" name="title"><br>
-  <label for="starting">Starting FEN Position:</label><br>
-  <input type="text" id="starting" name="starting">
-  <input type="submit" value="Submit">
-</form>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>chessboardjs Example #1001 - Start Position</title>
+    <base href="../" />
+    <link rel="stylesheet" href="css/chessboard-1.0.0.css">
+    <link rel="stylesheet" href="/css/chesski.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  </head>
 
-<div id="myBoard" style="width: 400px"></div>
-<div id="status"></div>
-<p>
-<button id="resetPosition" type="button" onclick="resetPosition()">Reset Position</button>
-</p>
-<p>
-<button id="useAsStart" type="button" onclick="useAsStartingPosition()">Use As Starting Position</button>
-</p>
-<div id="position">
+  <body>
 
-</div>
-<button onclick="savePuzzle()">Save Position</button>
+    <div class="container">
 
-<!--
+      <div class="row">
+        <form id="puzzleDetails" onsubmit="updatePuzzle(event); return false;">
+          <label for="title">Position Title:</label><br>
+          <input type="text" id="title" name="title"><br>
+          <label for="starting">Starting FEN Position:</label><br>
+          <input type="text" id="starting" name="starting">
+          <input type="submit" value="Submit">
+        </form>
+      </div>
+      <div class="row" style="padding-top: 20px">
+        <div class="col">
+        <div id="myBoard" style="width: 400px"></div>
+        </div>
+        <div class="col">
+          <div id="status"></div>
+          <div id="position"></div>
+        </div>
+      </div>
+      <div class="row" style="padding-top: 5px">
+        <p>
+          <button id="resetPosition" type="button" onclick="resetPosition()">Reset Position</button>
+        </p>
+        <p>
+          <button id="useAsStart" type="button" onclick="useAsStartingPosition()">Use As Starting Position</button>
+        </p>
+        <button type="button" onclick="savePuzzle()">Save Position</button>
+      </div>
+    </div>
+    <!--
 <div id="myModal" class="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
@@ -44,162 +55,172 @@
   </div>
 </div>
 -->
-<script src="js/jquery-3.4.1.min.js"></script>
-<script src="js/chessboard-1.0.0.js" ></script>
-<script src="js/chess.js"></script>
-<script src="js/chesski.js"></script>
-<script>
-let lastMove = null;
+    </div>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/chessboard-1.0.0.js"></script>
+    <script src="js/chess.js"></script>
+    <script src="js/chesski.js"></script>
+    <script>
+      let lastMove = null;
 
-let puzzleToSave = {
-    name: "Chess Puzzle",
-    startingPosition: "",
-    moves: [],
-    orientation: 'white'
-}
+      let puzzleToSave = {
+        name: "Chess Puzzle",
+        startingPosition: "",
+        moves: [],
+        orientation: 'white'
+      }
 
-function cleanPositionInfo() {
-  const domNode = document.getElementById("position");
-  domNode.innerHTML = '';
-}
+      function cleanPositionInfo() {
+        const domNode = document.getElementById("position");
+        domNode.innerHTML = '';
+      }
 
-function updatePositionInformation(fen) {
-  let startingPosText = document.getElementById("position");
-  let paragraph = document.createElement("p");
-  let text = document.createTextNode("Starting FEN: " + fen);
-  paragraph.appendChild(text);
-  startingPosText.appendChild(paragraph);
-}
+      function updatePositionInformation(fen) {
+        let startingPosText = document.getElementById("position");
+        let paragraph = document.createElement("p");
+        let text = document.createTextNode("Starting FEN: " + fen);
+        paragraph.appendChild(text);
+        startingPosText.appendChild(paragraph);
+      }
 
-function addMovesToSummary(piece, target) {
-  let startingPosText = document.getElementById("position");
-  let para = document.createElement("p");
-  let text = document.createTextNode(piece[1] + target);
-  para.appendChild(text);
-  startingPosText.appendChild(para);
-}
+      function addMovesToSummary(piece, target) {
+        let startingPosText = document.getElementById("position");
+        let toWrite;
+        if (piece[1] === 'P') {
+          toWrite = target;
+        } else {
+          toWrite = piece[1] + target;
+        }
+        if (startingPosText.innerText === '') {
+          startingPosText.innerText = toWrite
+        } else {
+          startingPosText.innerText = startingPosText.innerText + ", " + toWrite
+        }
+      }
 
-function statusMsg(msg, duration) {
-  const element = document.getElementById("status");
-  element.innerHTML = msg;
-  setTimeout(function () {
-    element.innerHTML = '';
-  }, duration);
-}
+      function statusMsg(msg, duration) {
+        const element = document.getElementById("status");
+        element.innerHTML = msg;
+        setTimeout(function() {
+          element.innerHTML = '';
+        }, duration);
+      }
 
-function savePuzzle() {
-  // TODO - If starting position is empty set to board initial state
-  let xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 201) {
-      resetPosition();
-      statusMsg("Puzzle Saved!", 5000);
-    }
-  }
-  xhr.open("POST", "/api/save-puzzle");
-  xhr.withCredentials = true;
-  xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-  xhr.send(JSON.stringify(puzzleToSave));
-}
+      function savePuzzle() {
+        // TODO - If starting position is empty set to board initial state
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 201) {
+            resetPosition();
+            statusMsg("Puzzle Saved!", 5000);
+          }
+        }
+        xhr.open("POST", "/api/save-puzzle");
+        xhr.withCredentials = true;
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.send(JSON.stringify(puzzleToSave));
+      }
 
 
-function validateMove(source, target, piece) {
-  const moveStatus = game.move({
-    from: source,
-    to: target,
-    promotion: 'q' // NOTE: always promote to a queen for example simplicity
-  });
-  if (moveStatus == null) {
-    return false;
-  }
-  if (lastMove == null) {
-    return true;
-  }
-  const color = piece[0];
-  return color !== lastMove;
-}
+      function validateMove(source, target, piece) {
+        const moveStatus = game.move({
+          from: source,
+          to: target,
+          promotion: 'q' // NOTE: always promote to a queen for example simplicity
+        });
+        if (moveStatus == null) {
+          return false;
+        }
+        if (lastMove == null) {
+          return true;
+        }
+        const color = piece[0];
+        return color !== lastMove;
+      }
 
-function determineOrientation(gameState) {
-  return (gameState.turn() === 'w') ? 'white' : 'black'
-}
+      function determineOrientation(gameState) {
+        return (gameState.turn() === 'w') ? 'white' : 'black'
+      }
 
-function updatePuzzle(event) {
-    let puzzleName = event.target.elements.title.value;
-    let startPos = event.target.elements.starting.value;
-    if (puzzleName.length === 0 || startPos.length === 0) {
-        alert("Both title and starting position must be set!");
-        return;
-    }
-    if (game.validate_fen(startPos) === false) {
-      alert("Invalid FEN");
-      // TODO - Alert when FEN does not have move information;
-      return;
-    }
-    game = new Chess(startPos);
-    board.position(startPos);
-    const orientation = determineOrientation(game)
-    board.orientation(orientation)
-    puzzleToSave.name = puzzleName;
-    puzzleToSave.startingPosition = startPos;
-    puzzleToSave.orientation = orientation;
-    puzzleToSave.moves = [];
-    cleanPositionInfo();
-    updatePositionInformation(startPos);
-}
+      function updatePuzzle(event) {
+        let puzzleName = event.target.elements.title.value;
+        let startPos = event.target.elements.starting.value;
+        if (puzzleName.length === 0 || startPos.length === 0) {
+          alert("Both title and starting position must be set!");
+          return;
+        }
+        if (game.validate_fen(startPos) === false) {
+          alert("Invalid FEN");
+          // TODO - Alert when FEN does not have move information;
+          return;
+        }
+        game = new Chess(startPos);
+        board.position(startPos);
+        const orientation = determineOrientation(game)
+        board.orientation(orientation)
+        puzzleToSave.name = puzzleName;
+        puzzleToSave.startingPosition = startPos;
+        puzzleToSave.orientation = orientation;
+        puzzleToSave.moves = [];
+        cleanPositionInfo();
+        updatePositionInformation(startPos);
+      }
 
-function resetPosition() {
-    board.position('start');
-    game = new Chess();
-    puzzleToSave = {
-      startingPosition: board.fen(),
-      moves: []
-    };
-    lastMove = null;
-    cleanPositionInfo();
-}
+      function resetPosition() {
+        board.position('start');
+        game = new Chess();
+        puzzleToSave = {
+          startingPosition: board.fen(),
+          moves: []
+        };
+        lastMove = null;
+        cleanPositionInfo();
+      }
 
-function onDrop (source, target, piece, newPos, oldPos, orientation) {
-    const isValid = validateMove(source, target, piece);
-    if (!isValid) {
-      return 'snapback';
-    }
-    if (isCastle(piece, source, target)) {
-      castleRook(board, target);
-    }
-    if (isPromotion(piece, target)) {
-      window.setTimeout(function () {
-        console.log(board.position())
-        let tempPosition = board.position();
-        tempPosition[target] = piece[0] + "Q";
-        board.position(tempPosition);
-      }, 250);
-    }
-    puzzleToSave.moves.push({
-        "start": source, "end": target
-    });
-    addMovesToSummary(piece, target);
-    lastMove = piece[0];
-}
+      function onDrop(source, target, piece, newPos, oldPos, orientation) {
+        const isValid = validateMove(source, target, piece);
+        if (!isValid) {
+          return 'snapback';
+        }
+        if (isCastle(piece, source, target)) {
+          castleRook(board, target);
+        }
+        if (isPromotion(piece, target)) {
+          window.setTimeout(function() {
+            console.log(board.position())
+            let tempPosition = board.position();
+            tempPosition[target] = piece[0] + "Q";
+            board.position(tempPosition);
+          }, 250);
+        }
+        puzzleToSave.moves.push({
+          "start": source,
+          "end": target
+        });
+        addMovesToSummary(piece, target);
+        lastMove = piece[0];
+      }
 
-function useAsStartingPosition() {
-  puzzleToSave.startingPosition = game.fen();
-  puzzleToSave.moves = [];
-  puzzleToSave.orientation = determineOrientation(game);
-  cleanPositionInfo();
-  updatePositionInformation(game.fen());
-}
+      function useAsStartingPosition() {
+        puzzleToSave.startingPosition = game.fen();
+        puzzleToSave.moves = [];
+        puzzleToSave.orientation = determineOrientation(game);
+        cleanPositionInfo();
+        updatePositionInformation(game.fen());
+      }
 
-function setInitialBoardState() {
-  return ChessBoard('myBoard', {
-    position: 'start',
-    showNotation: true,
-    draggable: true,
-    onDrop: onDrop,
-  });
-}
+      function setInitialBoardState() {
+        return ChessBoard('myBoard', {
+          position: 'start',
+          showNotation: true,
+          draggable: true,
+          onDrop: onDrop,
+        });
+      }
 
-let board = setInitialBoardState();
-let game = new Chess();
-</script>
-</body>
+      let board = setInitialBoardState();
+      let game = new Chess();
+    </script>
+  </body>
+
 </html>
